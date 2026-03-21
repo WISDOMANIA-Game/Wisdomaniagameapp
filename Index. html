@@ -1,1 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wisdomania</title>
 
+<style>
+body { font-family: Arial, sans-serif; text-align:center; background:#f9f9f9; margin:0; }
+header { background:#4a90e2; color:white; padding:20px; }
+main { padding:20px; }
+
+#spin-wheel {
+    width:250px; height:250px; margin:20px auto;
+    border:10px solid #4a90e2; border-radius:50%;
+    line-height:250px; font-size:22px; font-weight:bold;
+    color:#4a90e2; cursor:pointer;
+}
+
+#wisdom-display { font-size:20px; margin-top:20px; min-height:60px; }
+#repeat { margin-top:10px; color:#4a90e2; font-weight:bold; }
+
+button {
+    padding:10px 20px;
+    margin-top:15px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+#ad-banner { margin-top:20px; padding:10px; background:#eee; }
+
+footer { background:#222; color:white; padding:10px; margin-top:20px; }
+.footer-subline { font-size:12px; color:#aaa; }
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Wisdomania 🎯</h1>
+</header>
+
+<main>
+
+<p id="streak"></p>
+<p id="coins">🪙 Coins: 0</p>
+
+<div id="spin-wheel">SPIN 🎯</div>
+
+<div id="wisdom-display"></div>
+<div id="repeat"></div>
+
+<p>💎 Premium wisdom gives deeper life direction.</p>
+
+<button id="unlock-premium">🔓 Unlock Premium Wisdom</button>
+<p id="premium-message"></p>
+
+<p>✨ Support Wisdomania by exploring helpful resources below</p>
+
+<div id="ad-banner">
+<!-- PASTE ADSTERRA CODE HERE -->
+Adsterra Ad Placeholder
+</div>
+
+</main>
+
+<footer>
+© 2026 Wisdomania  
+<div class="footer-subline">Align. Grow. Enjoy. Balance Life.</div>
+</footer>
+
+<script>
+
+// SIMPLE EMBEDDED SOUND
+function playSound(freq){
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = freq;
+    osc.connect(ctx.destination);
+    osc.start();
+    setTimeout(()=>osc.stop(),150);
+}
+
+// DATA
+let coins = 0;
+
+const wisdomQuotes = [
+"Insight comes from reflection.",
+"Growth is a journey, not a race.",
+"Balance your life, and energy flows.",
+"Every day brings a new opportunity.",
+"Small steps lead to big results.",
+"Joy follows focus and clarity."
+];
+
+const premiumQuotes = [
+"💎 Your next level requires discipline.",
+"🔥 You are entering a powerful phase.",
+"⚡ Focus now — results will multiply."
+];
+
+// ELEMENTS
+const spinWheel = document.getElementById("spin-wheel");
+const wisdomDisplay = document.getElementById("wisdom-display");
+const repeatText = document.getElementById("repeat");
+const coinDisplay = document.getElementById("coins");
+const premiumBtn = document.getElementById("unlock-premium");
+const premiumMessage = document.getElementById("premium-message");
+
+// DAILY STREAK
+const today = new Date().toDateString();
+let lastVisit = localStorage.getItem("lastVisit");
+let streak = parseInt(localStorage.getItem("streak")) || 0;
+
+if (lastVisit !== today) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (lastVisit === yesterday.toDateString()) {
+        streak++;
+    } else {
+        streak = 1;
+    }
+
+    localStorage.setItem("lastVisit", today);
+    localStorage.setItem("streak", streak);
+}
+
+document.getElementById("streak").textContent = "🔥 Streak: " + streak + " day(s)";
+
+// SPIN ACTION
+spinWheel.onclick = () => {
+
+    playSound(400);
+    if (navigator.vibrate) navigator.vibrate(100);
+
+    spinWheel.style.transition = "transform 2s";
+    spinWheel.style.transform = `rotate(${Math.random()*720+720}deg)`;
+
+    wisdomDisplay.textContent = "🔮 Your wisdom is loading...";
+    repeatText.textContent = "";
+
+    setTimeout(() => {
+
+        coins++;
+        coinDisplay.textContent = "🪙 Coins: " + coins;
+
+        const quote = wisdomQuotes[Math.floor(Math.random()*wisdomQuotes.length)];
+
+        wisdomDisplay.textContent = quote;
+        repeatText.textContent = "🔁 Spin again to earn more coins";
+
+        playSound(800);
+        if (navigator.vibrate) navigator.vibrate([200,100,200]);
+
+        spinWheel.style.transform = "rotate(0deg)";
+    }, 2000);
+};
+
+// PREMIUM SYSTEM
+premiumBtn.onclick = () => {
+
+    if (coins >= 10) {
+        coins -= 10;
+        coinDisplay.textContent = "🪙 Coins: " + coins;
+
+        const quote = premiumQuotes[Math.floor(Math.random()*premiumQuotes.length)];
+
+        wisdomDisplay.textContent = quote;
+        premiumMessage.textContent = "✅ Premium unlocked!";
+    } else {
+        premiumMessage.innerHTML =
+        "❌ Not enough coins.<br>💳 Unlock now 👉 <a href='https://bit.ly/4189RJ1' target='_blank'>Get Premium</a>";
+    }
+};
+
+</script>
+
+</body>
+</html>
