@@ -1,24 +1,183 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wisdom Game</title>
-    <script type="text/javascript">
-        var adsterraParams = { id: 5679027 };
-        // Adsterra ad code setup
-        (function() {
-            var adsterraScript = document.createElement('script');
-            adsterraScript.src = 'https://example.com/adsterra.js'; // Replace with actual ad script URL
-            adsterraScript.async = true;
-            document.body.appendChild(adsterraScript);
-        })();
-    </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WISDOMANIA PRO</title>
+
+<style>
+body{font-family:Arial;background:#0f0f0f;color:#fff;text-align:center;padding:15px;}
+.card{background:#1e1e1e;padding:15px;border-radius:12px;margin:10px 0;}
+button{padding:12px;margin:5px;border:none;border-radius:8px;background:gold;color:#000;font-weight:bold;}
+input,textarea{width:90%;padding:10px;margin:5px;border-radius:8px;border:none;}
+.footer{font-size:12px;color:#aaa;margin-top:20px;}
+.footer strong{color:gold;}
+</style>
 </head>
-<body>
-    ...
-    <footer>
-        <p>&copy; 2026 Wisdom Game</p>
-    </footer>
+
+<body onload="init()">
+
+<h1>✨ WISDOMANIA PRO</h1>
+<p><i>Align. Grow. Enjoy. Balance Life</i></p>
+
+<div class="card">
+<h3>🪙 Coins: <span id="coins">0</span></h3>
+<h3>🔥 Streak: <span id="streak">0</span></h3>
+</div>
+
+<div class="card">
+<h3>🎁 Daily Reward</h3>
+<button onclick="daily()">Claim +20</button>
+</div>
+
+<div class="card">
+<h3>📅 Market Day Calculator</h3>
+<input type="date" id="date">
+<button onclick="calc()">Check</button>
+<p id="day"></p>
+</div>
+
+<div class="card">
+<h3>🎡 Spin & Win (20 coins)</h3>
+<button onclick="spin()">SPIN</button>
+</div>
+
+<div class="card">
+<h3>🔮 Oracle (15 coins)</h3>
+<textarea id="q" placeholder="Ask your question..."></textarea><br>
+<button onclick="oracle()">Ask</button>
+<p id="ans"></p>
+</div>
+
+<div class="card">
+<h3>👑 Premium</h3>
+<button onclick="premium()">Upgrade (500 coins)</button>
+</div>
+
+<div class="card">
+<h3>💰 Buy Coins</h3>
+<button onclick="buy()">Buy Now</button>
+</div>
+
+<!-- ADSTERRA -->
+<div class="card">
+<h3>Sponsored</h3>
+<script type="text/javascript">
+var atOptions = {
+ 'key' : '5679027',
+ 'format' : 'iframe',
+ 'height' : 250,
+ 'width' : 300,
+ 'params' : {}
+};
+document.write('<scr'+'ipt src="https://www.profitableratecpm.com/'+atOptions.key+'/invoke.js"></scr'+'ipt>');
+</script>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+<strong>Powered by Wisdomania Co-operative Society | gr8trabbi™</strong><br>
+Align. Grow. Enjoy. Balance Life
+</div>
+
+<audio id="spinSound" src="spin.mp3"></audio>
+<audio id="winSound" src="win.mp3"></audio>
+
+<script>
+let user;
+
+function init(){
+ user=JSON.parse(localStorage.getItem("user"))||{coins:50,streak:0,premium:false,last:null};
+ dailyCheck();
+ update();
+}
+
+function save(){localStorage.setItem("user",JSON.stringify(user));}
+
+function update(){
+ document.getElementById("coins").innerText=user.coins;
+ document.getElementById("streak").innerText=user.streak;
+ save();
+}
+
+function dailyCheck(){
+ let t=new Date().toDateString();
+ if(user.last!==t){
+  user.coins+=20;
+  user.streak++;
+  user.last=t;
+  alert("🔥 Daily bonus +20 coins");
+ }
+}
+
+function daily(){
+ user.coins+=20;
+ update();
+ alert("Reward claimed!");
+}
+
+let days=["Orie 💧","Afor 🌍","Nkwo 🌬","Eke 🔥"];
+function calc(){
+ let d=new Date(document.getElementById("date").value);
+ let base=new Date("2026-01-01");
+ let diff=Math.floor((d-base)/(1000*60*60*24));
+ let day=days[(diff%4+4)%4];
+ document.getElementById("day").innerText=day;
+}
+
+function spin(){
+ if(user.coins<20){alert("No coins"); buy(); return;}
+ user.coins-=20;
+ document.getElementById("spinSound").play();
+
+ let rewards=[0,0,0,5,0,10,0,20,0,50];
+ let r=rewards[Math.floor(Math.random()*rewards.length)];
+
+ setTimeout(()=>{
+  if(r>0){
+   user.coins+=r;
+   document.getElementById("winSound").play();
+   alert("🎉 You won "+r+" coins!");
+  }else{
+   alert("😢 0 coins... try again!");
+  }
+  update();
+ },1500);
+
+ update();
+}
+
+let answers=[
+"Yes, but be patient","No, not now","Something better is coming","You are close to success",
+"Delay is protection","Act boldly today","Your energy is aligned","A new opportunity is near",
+"Wait for clarity","Trust your instincts","Your effort will pay off","Do not rush this decision",
+"A breakthrough is near","Someone will help you soon","Your path is opening","Focus and you will win"
+];
+
+function oracle(){
+ if(user.coins<15){alert("Not enough coins"); return;}
+ user.coins-=15;
+
+ let pool=user.premium?answers:answers.slice(0,3);
+ let a=pool[Math.floor(Math.random()*pool.length)];
+
+ document.getElementById("ans").innerText=a;
+
+ update();
+}
+
+function premium(){
+ if(user.coins<500){alert("Need 500 coins"); return;}
+ user.coins-=500;
+ user.premium=true;
+ alert("👑 Premium unlocked!");
+ update();
+}
+
+function buy(){
+ window.location.href="https://bit.ly/4189RJ1";
+}
+</script>
+
 </body>
 </html>
