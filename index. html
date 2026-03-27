@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=yes" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Wisdomania Cash Quest — Mobile Demo</title>
+  <meta name="description" content="Wisdomania Cash Quest — colorful, interactive demo with spin wheel, leaderboard, and rewards. Fully responsive, Netlify-ready." />
+  <!-- Preconnect + Google Fonts: Inter & system fallback -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+  <!-- PWA manifest placeholder (optional, Netlify friendly) -->
+  <link rel="manifest" href="data:application/manifest+json,{}" />
+  <style>
+    :root{
+      --bg:#0f172a; --panel:#071028; --muted:#9fb0c8; --accent:#ffb020; --accent-dark:#e08f00;
+      --card-grad: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      --radius:20px; --glass: rgba(255,255,255,0.03);
+      --touch-target: 44px;
+    }
+    *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+    html,body{height:100%;margin:0;padding:0;font-family:'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;color:#fff;background:
+      radial-gradient(1000px 600px at 10% 10%, rgba(36,58,84,0.4), transparent),
+      linear-gradient(180deg,var(--bg), #021427);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+    .wrap{max-width:980px;margin:0 auto;padding:16px 16px 20px;}
+    header{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap;}
+    .logo{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#1e3a8a,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:20px;box-shadow:0 12px 24px rgba(0,0,0,0.3);}
+    h1{font-size:1.35rem;margin:0;line-height:1.2;letter-spacing:-0.2px;}
+    p.lead{margin:4px 0 0;color:var(--muted);font-size:0.85rem;max-width:380px;}
+    .grid{display:grid;gap:18px;margin-top:14px}
+    @media(min-width:820px){ .grid{grid-template-columns:repeat(3,1fr);} }
+    .card{background:var(--card-grad);padding:18px 16px;border-radius:var(--radius);box-shadow:0 8px 28px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.05);backdrop-filter:blur(2px);transition:transform 0.1s ease;}
+    .big{grid-column:span 2}
+    @media(max-width:819px){ .big{grid-column:auto} }
+    .center{text-align:center}
+    .muted{color:var(--muted);font-size:0.85rem}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:44px;background:linear-gradient(180deg,var(--accent),var(--accent-dark));color:#1e1b13;font-weight:700;border:none;cursor:pointer;box-shadow:0 8px 18px rgba(224,143,0,0.25);font-size:0.9rem;transition:all 0.2s;min-height:var(--touch-target);min-width:44px;}
+    .btn:active{transform:scale(0.96);background:var(--accent-dark);}
+    .btn.secondary{background:rgba(255,255,255,0.05);color:#fff;border:1px solid rgba(255,255,255,0.15);box-shadow:none;backdrop-filter:blur(4px);}
+    .stat{font-size:1.9rem;font-weight:800;margin:6px 0;letter-spacing:-1px;line-height:1;}
+    .small{font-size:0.8rem}
+    input.code{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);padding:12px 8px;border-radius:44px;color:#fff;text-align:center;width:100%;font-family:monospace;font-size:0.85rem;}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    .col{display:flex;flex-direction:column;gap:8px;}
+    .avatar{width:56px;height:56px;border-radius:18px;object-fit:cover;border:2px solid rgba(255,176,32,0.5);background:#1e293b;}
+    /* spin wheel - dynamic segments */
+    .wheel-wrap{display:flex;justify-content:center;align-items:center;flex-direction:column;gap:10px;width:100%;}
+    .wheel{width:180px;height:180px;border-radius:50%;position:relative;box-shadow:0 12px 28px rgba(0,0,0,0.5);transition:transform 2.8s cubic-bezier(0.2, 0.9, 0.2, 1.05);background: conic-gradient(from 0deg, #ffb020, #f97316, #a78bfa, #34d399, #60a5fa, #f43f5e, #2dd4bf, #facc15);}
+    .wheel .center{width:58px;height:58px;border-radius:50%;background:#07122a;display:flex;align-items:center;justify-content:center;font-weight:800;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:inset 0 0 0 3px rgba(255,176,32,0.6);backdrop-filter:blur(6px);}
+    .pointer{width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-bottom:26px solid #ffecb3;position:relative;top:2px;filter:drop-shadow(0 4px 6px black);z-index:5;}
+    #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;background:#0f172ae6;backdrop-filter:blur(12px);padding:12px 22px;border-radius:60px;border:1px solid rgba(255,176,32,0.4);display:none;z-index:2000;font-weight:500;font-size:0.9rem;white-space:nowrap;max-width:90vw;white-space:normal;text-align:center;}
+    .leader-row{display:flex;justify-content:space-between;padding:10px 8px;border-radius:16px;background:rgba(255,255,255,0.02);margin-bottom:8px;align-items:center;backdrop-filter:blur(2px);}
+    footer{margin-top:28px;color:var(--muted);text-align:center;font-size:0.8rem;border-top:1px solid rgba(255,255,255,0.05);padding-top:18px;}
+    button:disabled, .btn:disabled{opacity:0.45;transform:none;cursor:not-allowed;filter:grayscale(0.1);}
+    .flex-between{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+    ul{margin:0;padding-left:18px;}
+    li{margin:6px 0;}
+    @media (max-width:540px){
+      .wrap{padding:12px;}
+      .wheel{width:160px;height:160px;}
+      .btn{padding:10px 16px;}
+      .stat{font-size:1.7rem;}
+    }
+    .badge{background:var(--accent);color:#1e1b13;border-radius:40px;padding:4px 12px;font-weight:700;font-size:0.7rem;display:inline-block;}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">WQ</div>
+    <div>
+      <h1>Wisdomania Cash Quest</h1>
+      <p class="lead">Mobile-first • Spin & win • Earn real-style rewards • Netlify ready</p>
+    </div>
+  </header>
+
+  <main class="grid">
+    <!-- Auth / Profile Card (big) -->
+    <section class="card big" id="authCard">
+      <div class="flex-between">
+        <div>
+          <h2 style="margin:0 0 4px">✨ Player Hub</h2>
+          <div class="muted small">Demo sign-in — full server auth required for production</div>
+        </div>
+        <div id="signedOutArea">
+          <button id="btnDemoSign" class="btn">🎭 Demo Sign‑In</button>
+        </div>
+        <div id="signedInArea" style="display:none;align-items:center;gap:14px;flex-wrap:wrap;">
+          <img id="pfp" class="avatar" src="" alt="avatar" />
+          <div style="text-align:right">
+            <div id="name" style="font-weight:800;font-size:1.1rem"></div>
+            <div id="job" class="muted small">⭐ Cash Explorer</div>
+            <button id="btnSignOut" class="btn secondary" style="margin-top:6px;">Sign out</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px">
+        <div style="flex:1;min-width:200px">
+          <div class="card" style="padding:12px;background:rgba(0,0,0,0.2)">
+            <div class="muted small">💰 Wallet (NGN)</div>
+            <div class="stat" id="balance">₦0</div>
+            <div class="row" style="justify-content:center;margin-top:12px;">
+              <button id="withdraw" class="btn secondary">Withdraw</button>
+              <button id="payNow" class="btn">Pay ₦200</button>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:200px">
+          <div class="card" style="padding:12px;background:rgba(0,0,0,0.2)">
+            <div class="muted small">🎯 Points & Level</div>
+            <div class="stat" id="points">0</div>
+            <div id="level" class="badge" style="margin-top:4px;">Beginner</div>
+            <div class="row" style="justify-content:center;margin-top:12px;">
+              <button id="earnBtn" class="btn">+10 Points</button>
+              <button id="spinBtn" class="btn secondary">🎡 Spin</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+        <div style="flex:2;min-width:180px">
+          <div class="muted small">🔗 Referral link (demo)</div>
+          <div class="row" style="margin-top:6px;">
+            <input id="refInput" class="code" readonly value="Sign in to generate" />
+            <button id="copyBtn" class="btn secondary" style="padding:10px 18px;">Copy</button>
+          </div>
+        </div>
+        <div style="min-width:130px;text-align:center">
+          <div class="muted small">📅 Daily Bonus</div>
+          <button id="claimDaily" class="btn secondary" style="margin-top:4px;">🎁 Claim +20</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Spin Wheel Card - now with dynamic segments & real spin logic -->
+    <section class="card center">
+      <h2 style="margin:0 0 8px">🎡 Spin to Win</h2>
+      <div class="wheel-wrap">
+        <div class="pointer" aria-hidden="true"></div>
+        <div id="wheel" class="wheel" role="img" aria-label="Prize wheel">
+          <div class="center">LUCK</div>
+        </div>
+        <div id="spinMsg" class="muted small">Tap SPIN — win points up to 50!</div>
+        <button id="spinAction" class="btn" style="margin-top:6px;">🌀 SPIN NOW</button>
+      </div>
+    </section>
+
+    <!-- Leaderboard Card -->
+    <section class="card">
+      <h2 style="margin:0 0 12px">🏆 Top Earners</h2>
+      <div id="leaderboard" class="muted small" style="min-height:180px;"></div>
+      <button id="resetBoard" class="btn secondary" style="width:100%;margin-top:12px;">Reset Local Board</button>
+    </section>
+
+    <!-- Promo & CTA -->
+    <section class="card">
+      <h2 style="margin:0 0 8px">📢 Promote & Boost</h2>
+      <p class="muted small">Viral hooks, bright rewards & easy sharing. Perfect for mobile campaigns.</p>
+      <div class="row" style="gap:12px;margin-top:14px;">
+        <button id="shareBtn" class="btn">📲 Share App</button>
+        <button id="adDemo" class="btn secondary">📺 Ad Demo</button>
+      </div>
+    </section>
+
+    <!-- Quick Tips -->
+    <section class="card">
+      <h2 style="margin:0 0 8px">💡 Pro Tips</h2>
+      <ul class="muted small">
+        <li>Daily bonus & spins boost points fast</li>
+        <li>Invite friends with your referral link</li>
+        <li>Reach 1000 points → withdraw ₦5,000</li>
+      </ul>
+      <button id="startPromo" class="btn" style="margin-top:10px;">📸 Export Promo Card</button>
+    </section>
+  </main>
+
+  <footer>
+    <p class="muted small">⚡ Demo experience — real payments & secure auth must be implemented server-side before production. Netlify ready, mobile-optimized.</p>
+  </footer>
+  <div id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script>
+  (function() {
+    // ---------- DYNAMIC WHEEL: 8 segments with matching rewards & colors ----------
+    const REWARDS = [5, 10, 20, 50, 0, 15, 25, 8];   // actual win points
+    const COLORS = ["#ffb020", "#f97316", "#a78bfa", "#34d399", "#60a5fa", "#f43f5e", "#2dd4bf", "#facc15"];
+    const SEG_COUNT = REWARDS.length;
+    const ANGLE_PER_SEG = 360 / SEG_COUNT;
+
+    // Build conic-gradient string
+    function buildGradient() {
+      let stops = [];
+      for (let i = 0; i < SEG_COUNT; i++) {
+        let start = i * ANGLE_PER_SEG;
+        let end = (i + 1) * ANGLE_PER_SEG;
+        stops.push(`${COLORS[i]} ${start}deg ${end}deg`);
+      }
+      return `conic-gradient(from 0deg, ${stops.join(', ')})`;
+    }
+
+    const wheelDiv = document.getElementById('wheel');
+    wheelDiv.style.background = buildGradient();
+
+    // Helper: determine prize based on rotation angle (pointer at top = 0deg)
+    function getPrizeFromRotation(rotationDeg) {
+      // rotationDeg is current wheel rotation (0-360)
+      // pointer direction is fixed at 12 o'clock = -90deg? Wait: conic starts at 0deg (right side). 
+      // But pointer top: In standard wheel, the winning segment is where the marker points.
+      // Our marker (triangle) points downwards to the wheel center? Actually pointer is above wheel, its tip points to wheel edge.
+      // We define the winning angle = 0deg (top of wheel). With conic gradient starting at 0deg (right side) we need offset.
+      // Better: define segment boundary and check which segment contains the direction of pointer relative to wheel rotation.
+      // The wheel rotates, so the segment that appears under the pointer = segment whose original start angle <= (pointerAngle - rotation) mod 360 < end
+      // pointer is at the top = -90deg (or 270deg) relative to conic start? Easier: map pointer fixed to 0° after correction.
+      // Let's set pointer direction = 0deg (top) -> in conic coordinates, top = -90deg => we adjust: effectiveAngle = ( -90 - rotationDeg + 360 ) % 360
+      // Then find segment where start <= effectiveAngle < end.
+      const pointerBaseAngle = -90; // top direction in standard conic orientation (0° = right, positive = clockwise)
+      let rawAngle = (pointerBaseAngle - rotationDeg + 360) % 360;
+      for (let i = 0; i < SEG_COUNT; i++) {
+        let start = i * ANGLE_PER_SEG;
+        let end = (i + 1) * ANGLE_PER_SEG;
+        if (rawAngle >= start && rawAngle < end) {
+          return REWARDS[i];
+        }
+      }
+      // fallback (should never happen)
+      return REWARDS[0];
+    }
+
+    // ---------- GLOBAL STATE ----------
+    let state = {
+      user: null,
+      points: 0,
+    };
+    let spinning = false;
+
+    // DOM elements
+    const toastEl = document.getElementById('toast');
+    function toast(msg, duration = 2200) {
+      toastEl.textContent = msg;
+      toastEl.style.display = 'block';
+      clearTimeout(toastEl._tm);
+      toastEl._tm = setTimeout(() => toastEl.style.display = 'none', duration);
+    }
+
+    const pointsSpan = document.getElementById('points');
+    const balanceSpan = document.getElementById('balance');
+    const levelSpan = document.getElementById('level');
+    const refInput = document.getElementById('refInput');
+    const leaderEl = document.getElementById('leaderboard');
+    const spinMsgDiv = document.getElementById('spinMsg');
+
+    // Helper: update UI (balance, points, level, referral code)
+    function updateUI() {
+      pointsSpan.textContent = state.points;
+      const nairaBalance = state.points * 5;
+      balanceSpan.textContent = '₦' + nairaBalance.toLocaleString('en-NG');
+      if (state.points < 50) levelSpan.textContent = 'Beginner';
+      else if (state.points < 150) levelSpan.textContent = 'Pro 🚀';
+      else levelSpan.textContent = 'Master 💎';
+      if (state.user) {
+        refInput.value = generateRefCode(state.user.id);
+      } else {
+        refInput.value = 'Sign in to generate';
+      }
+      const signedIn = !!state.user;
+      document.getElementById('earnBtn').disabled = !signedIn;
+      document.getElementById('spinAction').disabled = !signedIn;
+      document.getElementById('withdraw').disabled = !signedIn;
+      document.getElementById('payNow').disabled = !signedIn;
+      document.getElementById('claimDaily').disabled = !signedIn;
+    }
+
+    // Leaderboard functions (localStorage)
+    function saveLeaderboardEntry(username, score) {
+      if (!username) return;
+      try {
+        let board = JSON.parse(localStorage.getItem('wq_leaderboard') || '[]');
+        const id = username.toLowerCase().replace(/\s/g, '_') + '_' + Date.now().slice(-4);
+        const existingIndex = board.findIndex(entry => entry.name === username);
+        if (existingIndex !== -1) {
+          board[existingIndex].score = score;
+        } else {
+          board.push({ name: username, score: score });
+        }
+        board.sort((a, b) => b.score - a.score);
+        localStorage.setItem('wq_leaderboard', JSON.stringify(board.slice(0, 20)));
+        renderLeaderboard();
+      } catch(e) { console.warn(e); }
+    }
+
+    function renderLeaderboard() {
+      const board = JSON.parse(localStorage.getItem('wq_leaderboard') || '[]');
+      leaderEl.innerHTML = '';
+      if (!board.length) {
+        leaderEl.innerHTML = '<div class="muted center">✨ No champions yet — spin & earn!</div>';
+        return;
+      }
+      board.slice(0, 7).forEach((p, idx) => {
+        const row = document.createElement('div');
+        row.className = 'leader-row';
+        row.innerHTML = `
+          <div style="display:flex;gap:12px;align-items:center;">
+            <div style="width:32px;height:32px;border-radius:30px;background:${idx === 0 ? '#ffb020' : '#334155'};display:flex;align-items:center;justify-content:center;font-weight:800;">${idx+1}</div>
+            <div><strong>${escapeHtml(p.name)}</strong></div>
+          </div>
+          <div style="font-weight:700;background:#ffb02020;padding:4px 12px;border-radius:40px;">${p.score} pts</div>
+        `;
+        leaderEl.appendChild(row);
+      });
+    }
+
+    function escapeHtml(str) { return String(str).replace(/[&<>]/g, function(m){ if(m === '&') return '&amp;'; if(m === '<') return '&lt;'; if(m === '>') return '&gt;'; return m; }); }
+
+    function generateRefCode(uid) {
+      return 'WQ' + btoa(uid + Date.now()).replace(/=+$/, '').slice(0, 9).toUpperCase();
+    }
+
+    // Sign-in / sign-out
+    document.getElementById('btnDemoSign').addEventListener('click', () => {
+      const rawName = prompt('Enter your player name (max 20 chars)', 'QuestMaster');
+      if (!rawName) return;
+      const name = rawName.trim().slice(0, 20);
+      if (!name) return;
+      state.user = {
+        id: 'demo_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
+        name: name,
+        avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(name)}&backgroundColor=1e293b`
+      };
+      document.getElementById('signedOutArea').style.display = 'none';
+      document.getElementById('signedInArea').style.display = 'flex';
+      document.getElementById('name').textContent = state.user.name;
+      document.getElementById('pfp').src = state.user.avatar;
+      // if points 0, still update board
+      saveLeaderboardEntry(state.user.name, state.points);
+      toast(`Welcome, ${state.user.name}! Start earning points 🎉`);
+      updateUI();
+    });
+
+    document.getElementById('btnSignOut').addEventListener('click', () => {
+      state.user = null;
+      document.getElementById('signedOutArea').style.display = 'block';
+      document.getElementById('signedInArea').style.display = 'none';
+      updateUI();
+      toast('Signed out (demo mode)');
+    });
+
+    // Earn points
+    document.getElementById('earnBtn').addEventListener('click', () => {
+      if (!state.user) { toast('Sign in first'); return; }
+      state.points += 10;
+      saveLeaderboardEntry(state.user.name, state.points);
+      toast('✨ +10 points earned!');
+      updateUI();
+    });
+
+    // SPIN WHEEL (accurate physics + reward)
+    const spinActionBtn = document.getElementById('spinAction');
+    let currentRotation = 0;
+
+    function spinWheel() {
+      if (!state.user) { toast('Please sign in to spin'); return; }
+      if (spinning) return;
+      spinning = true;
+      spinActionBtn.disabled = true;
+      spinMsgDiv.textContent = '🌀 Spinning... good luck!';
+      
+      // Random spins 5-10 full turns + random offset
+      const spins = 6 + Math.floor(Math.random() * 6);
+      const extraDeg = Math.floor(Math.random() * 360);
+      const targetDelta = (spins * 360) + extraDeg;
+      const newRotation = (currentRotation + targetDelta) % 360;
+      
+      wheelDiv.style.transition = 'transform 2.8s cubic-bezier(0.2, 0.9, 0.2, 1.05)';
+      wheelDiv.style.transform
